@@ -451,7 +451,6 @@ async def unstake_multiple_extrinsic(
                         raise_error=raise_error,
                         wait_for_inclusion=wait_for_inclusion,
                         wait_for_finalization=wait_for_finalization,
-                        wait_for_revealed_execution=wait_for_revealed_execution,
                     )
                 else:
                     response = await unstake_extrinsic(

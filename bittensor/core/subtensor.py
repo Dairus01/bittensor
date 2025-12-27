@@ -190,7 +190,7 @@ class Subtensor(SubtensorMixin):
         - **Alpha**: Subnet-specific token representing some quantity of TAO staked into a subnet.
         - **Rao**: Smallest unit of TAO (1 TAO = 1e9 Rao)
         - Bittensor Glossary <https://docs.learnbittensor.org/glossary>
-        - Wallets, Coldkeys, and Hotkeys in Bittensor <https://docs.learnbittensor.org/keys/wallets>
+        - Wallets, Coldkeys and Hotkeys in Bittensor <https://docs.learnbittensor.org/keys/wallets>
 
     """
 
@@ -428,6 +428,29 @@ class Subtensor(SubtensorMixin):
         Raises:
             ValueError: If no default value is provided, and none of the methods exist at the given block, a
                 ValueError will be raised.
+
+        Example:
+
+            value = self._query_with_fallback(
+
+                # the first attempt will be made to SubtensorModule.MechanismEmissionSplit with params [1]
+
+                ("SubtensorModule", "MechanismEmissionSplit", [1]),
+
+                # if it does not exist at the given block, the next attempt will be made to
+
+                # SubtensorModule.MechanismEmission with params None
+
+                ("SubtensorModule", "MechanismEmission", None),
+
+                block_hash="0x1234",
+
+                # if none of the methods exist at the given block, the default value of None will be returned
+
+                default_value=None,
+
+            )
+
         """
         if block_hash is None:
             block_hash = self.substrate.get_chain_head()
@@ -466,6 +489,37 @@ class Subtensor(SubtensorMixin):
         Raises:
             ValueError: If no default value is provided, and none of the methods exist at the given block, a
                 ValueError will be raised.
+
+        Example:
+
+            query = self._runtime_call_with_fallback(
+
+                # the first attempt will be made to SubnetInfoRuntimeApi.get_selective_mechagraph with the
+
+                # given params
+
+                (
+
+                    "SubnetInfoRuntimeApi",
+
+                    "get_selective_mechagraph",
+
+                    [netuid, mechid, [f for f in range(len(SelectiveMetagraphIndex))]],
+
+                ),
+
+                # if it does not exist at the given block, the next attempt will be made as such:
+
+                ("SubnetInfoRuntimeApi", "get_metagraph", [[netuid]]),
+
+                block_hash=block_hash,
+
+                # if none of the methods exist at the given block, the default value will be returned
+
+                default_value=None,
+
+            )
+
         """
         if block_hash is None:
             block_hash = self.substrate.get_chain_head()
@@ -558,11 +612,17 @@ class Subtensor(SubtensorMixin):
         Example:
 
             # Simulate staking 100 TAO stake to subnet 1
+
             result = subtensor.sim_swap(
+
                 origin_netuid=0,
+
                 destination_netuid=1,
+
                 amount=Balance.from_tao(100)
+
             )
+
             print(f"Fee: {result.tao_fee.tao} TAO, Output: {result.alpha_amount} Alpha")
 
         Notes:
@@ -931,10 +991,15 @@ class Subtensor(SubtensorMixin):
             Bond values are u16-normalized (0-65535, where 65535 = 1.0 or 100%).
 
         Example:
+
             # Get bonds for subnet 1
+
             bonds = subtensor.bonds(netuid=1)
+
             print(bonds[0])
+
             # example output: (5, [(0, 32767), (1, 16383), (3, 8191)])
+
             # This means validator UID 5 has bonds: 50% to miner 0, 25% to miner 1, 12.5% to miner 3
 
         Notes:
@@ -1481,9 +1546,13 @@ class Subtensor(SubtensorMixin):
         Example:
 
             # Get children for a hotkey in subnet 1
+
             success, children, error = subtensor.get_children(hotkey="5F...", netuid=1)
+
             if success:
+
                 for proportion, child_hotkey in children:
+
                     print(f"Child {child_hotkey}: {proportion}")
 
         Notes:
@@ -1530,6 +1599,7 @@ class Subtensor(SubtensorMixin):
 
         Returns:
             tuple: A tuple containing:
+
                 - list[tuple[float, str]]: A list of children with their proportions.
                 - int: The cool-down block number.
 
@@ -1628,14 +1698,13 @@ class Subtensor(SubtensorMixin):
         Otherwise, all known constants defined in `CrowdloanConstants.field_names()` are fetched.
 
         These constants define requirements and operational limits for crowdloan campaigns:
-            AbsoluteMinimumContribution: Minimum amount per contribution (TAO).
-            MaxContributors: Maximum number of unique contributors per crowdloan.
-            MaximumBlockDuration: Maximum duration (in blocks) for a crowdloan campaign (60 days = 432,000 blocks on
-                production).
-            MinimumDeposit: Minimum deposit required from the creator (TAO).
-            MinimumBlockDuration: Minimum duration (in blocks) for a crowdloan campaign (7 days = 50,400 blocks on
-                production).
-            RefundContributorsLimit: Maximum number of contributors refunded per `refund_crowdloan` call (typically 50).
+
+        - `AbsoluteMinimumContribution`: Minimum amount per contribution (TAO).
+        - `MaxContributors`: Maximum number of unique contributors per crowdloan.
+        - `MaximumBlockDuration`: Maximum duration (in blocks) for a crowdloan campaign (60 days = 432,000 blocks on production).
+        - `MinimumDeposit`: Minimum deposit required from the creator (TAO).
+        - `MinimumBlockDuration`: Minimum duration (in blocks) for a crowdloan campaign (7 days = 50,400 blocks on production).
+        - `RefundContributorsLimit`: Maximum number of contributors refunded per `refund_crowdloan` call (typically 50).
 
         Parameters:
             constants: Specific constant names to query. If `None`, retrieves all constants from `CrowdloanConstants`.
@@ -2368,18 +2437,26 @@ class Subtensor(SubtensorMixin):
             MetagraphInfo object with the requested subnet mechanism data, None if the subnet mechanism does not exist.
 
         Example:
+
             # Retrieve all fields from the metagraph from subnet 2 mechanism 0
+
             meta_info = subtensor.get_metagraph_info(netuid=2)
+
             # Retrieve all fields from the metagraph from subnet 2 mechanism 1
+
             meta_info = subtensor.get_metagraph_info(netuid=2, mechid=1)
 
             # Retrieve selective data from the metagraph from subnet 2 mechanism 0
+
             partial_meta_info = subtensor.get_metagraph_info(
+
                 netuid=2,
+
                 selected_indices=[SelectiveMetagraphIndex.Name, SelectiveMetagraphIndex.OwnerHotkeys]
             )
 
             # Retrieve selective data from the metagraph from subnet 2 mechanism 1
+
             partial_meta_info = subtensor.get_metagraph_info(
                 netuid=2,
                 mechid=1,
@@ -3061,7 +3138,6 @@ class Subtensor(SubtensorMixin):
         hotkey_ss58: str,
         block: Optional[int] = None,
     ) -> Optional[tuple[tuple[int, str], ...]]:
-        # TODO: Clarify return ordering and units; add Examples
         """Retrieves hotkey related revealed commitment for a given subnet.
 
         Parameters:
@@ -3070,7 +3146,12 @@ class Subtensor(SubtensorMixin):
             block: The block number to query. If `None`, queries the current chain head.
 
         Returns:
-            A tuple of reveal block and commitment message.
+            A tuple of tuples, where each inner tuple contains the reveal block number and the commitment message.
+            The return format is `((reveal_block, commitment_message), ...)`.
+
+        Example:
+            >>> subtensor.get_revealed_commitment_by_hotkey(netuid=1, hotkey_ss58="5C4hr...")
+            ((123, "commitment_string_1"), (150, "commitment_string_2"))
 
         Notes:
             - <https://docs.learnbittensor.org/glossary#commit-reveal>
@@ -3332,7 +3413,7 @@ class Subtensor(SubtensorMixin):
             block=block,
             params=[hotkey_ss58, coldkey_ss58, netuid],
         )
-        alpha_shares = alpha_shares_query
+        alpha_shares = cast(FixedPoint, alpha_shares_query)
 
         hotkey_alpha_obj: ScaleObj = self.query_module(
             module="SubtensorModule",
@@ -3342,12 +3423,13 @@ class Subtensor(SubtensorMixin):
         )
         hotkey_alpha = hotkey_alpha_obj.value
 
-        hotkey_shares = self.query_module(
+        hotkey_shares_query = self.query_module(
             module="SubtensorModule",
             name="TotalHotkeyShares",
             block=block,
             params=[hotkey_ss58, netuid],
         )
+        hotkey_shares = cast(FixedPoint, hotkey_shares_query)
 
         alpha_shares_as_float = fixed_to_float(alpha_shares)
         hotkey_shares_as_float = fixed_to_float(hotkey_shares)
@@ -3977,11 +4059,11 @@ class Subtensor(SubtensorMixin):
         as long as they match filter_for_netuids.
 
         Parameters:
-            all_netuids: A list of netuids to consider for filtering.
-            filter_for_netuids: A subset of netuids to restrict the result to. If None/empty, returns all netuids with
-                registered hotkeys.
-            all_hotkeys: Hotkeys to check for registration.
-            block: The blockchain block number for the query.
+            all_netuids (Iterable[int]): A list of netuids to consider for filtering.
+            filter_for_netuids (Iterable[int]): A subset of netuids to restrict the result to. If None/empty, returns
+                all netuids with registered hotkeys.
+            all_hotkeys (Iterable[Wallet]): Hotkeys to check for registration.
+            block (Optional[int]): The blockchain block number for the query.
 
         Returns:
             The filtered list of netuids (union of filtered all_netuids and registered hotkeys).
@@ -4052,8 +4134,8 @@ class Subtensor(SubtensorMixin):
         with validator weight submissions.
 
         Parameters:
-            netuid: The unique identifier of the subnet.
-            block: The blockchain block number for the query.
+            netuid (int): The unique identifier of the subnet.
+            block (Optional[int]): The blockchain block number for the query.
 
         Returns:
             bool: True if in freeze window, else False.
@@ -4229,8 +4311,8 @@ class Subtensor(SubtensorMixin):
 
         Returns:
             The stored maximum weight limit as a normalized float in [0, 1], or `None` if the subnetwork
-                does not exist. Note: this value is not enforced - the weight validation code uses a hardcoded u16::MAX
-                    instead.
+                does not exist. Note: this value is not actually enforced - the weight validation code uses
+                a hardcoded u16::MAX instead.
 
         Notes:
             - This hyperparameter is now a constant rather than a settable variable.
@@ -4416,11 +4498,14 @@ class Subtensor(SubtensorMixin):
             See the `Bittensor CLI documentation <https://docs.bittensor.com/reference/btcli>`_ for supported identity
             parameters.
         """
-        identity_info = self.substrate.query(
-            module="SubtensorModule",
-            storage_function="IdentitiesV2",
-            params=[coldkey_ss58],
-            block_hash=self.determine_block_hash(block),
+        identity_info = cast(
+            dict,
+            self.substrate.query(
+                module="SubtensorModule",
+                storage_function="IdentitiesV2",
+                params=[coldkey_ss58],
+                block_hash=self.determine_block_hash(block),
+            ),
         )
 
         if not identity_info:
@@ -4888,13 +4973,21 @@ class Subtensor(SubtensorMixin):
             Balance object representing the extrinsic fee in Rao.
 
         Example:
+
             # Estimate fee before sending a transfer
+
             call = subtensor.compose_call(
+
                 call_module="Balances",
+
                 call_function="transfer",
+
                 call_params={"dest": destination_ss58, "value": amount.rao}
+
             )
+
             fee = subtensor.get_extrinsic_fee(call=call, keypair=wallet.coldkey)
+
             print(f"Estimated fee: {fee.tao} TAO")
 
         Notes:
@@ -5707,7 +5800,7 @@ class Subtensor(SubtensorMixin):
             - Only the creator can finalize.
             - Finalization requires `raised == cap` and `current_block >= end`.
             - For subnet leases, emissions are swapped to TAO and distributed to contributors' coldkeys during the lease.
-            - Leftover cap (after subnet lock and proxy deposit) is refunded to contributors pro-rata.
+            - Leftover cap (after subnet lock + proxy deposit) is refunded to contributors pro-rata.
 
             - Crowdloans Overview: <https://docs.learnbittensor.org/subnets/crowdloans>
             - Crowdloan Tutorial: <https://docs.learnbittensor.org/subnets/crowdloans/crowdloans-tutorial#step-5-finalize-the-crowdloan>
@@ -5847,7 +5940,7 @@ class Subtensor(SubtensorMixin):
                 have successfully decrypted and executed the inner call. If True, the function will poll subsequent
                 blocks for the event matching this submission's commitment.
             blocks_for_revealed_execution: Maximum number of blocks to poll for the executed event after inclusion. The
-                function checks blocks from start_block to start_block + blocks_for_revealed_execution. Returns
+                function checks blocks from start_block+1 to start_block + blocks_for_revealed_execution. Returns
                 immediately if the event is found before the block limit is reached.
 
         Returns:
@@ -5921,24 +6014,41 @@ class Subtensor(SubtensorMixin):
             ExtrinsicResponse: The result object of the extrinsic execution.
 
         Example:
+
             import bittensor as bt
+
             subtensor = bt.subtensor(network="local")
+
             my_wallet = bt.Wallet()
+
             # if liquidity_delta is negative
+
             my_liquidity_delta = Balance.from_tao(100) * -1
+
             subtensor.modify_liquidity(
+
                 wallet=my_wallet,
+
                 netuid=123,
+
                 position_id=2,
+
                 liquidity_delta=my_liquidity_delta
+
             )
 
             # if liquidity_delta is positive
+
             my_liquidity_delta = Balance.from_tao(120)
+
             subtensor.modify_liquidity(
+
                 wallet=my_wallet,
+
                 netuid=123,
+
                 position_id=2,
+
                 liquidity_delta=my_liquidity_delta
             )
 
@@ -6793,12 +6903,12 @@ class Subtensor(SubtensorMixin):
             mev_protection: If `True`, encrypts and submits the transaction through the MEV Shield pallet to protect
                 against front-running and MEV attacks. The transaction remains encrypted in the mempool until validators
                 decrypt and execute it. If `False`, submits the transaction directly without encryption.
-            period: The number of blocks during which the transaction will remain valid after it's
+            period (Optional[int]): The number of blocks during which the transaction will remain valid after it's
                 submitted. If the transaction is not included in a block within that number of blocks, it will expire
                 and be rejected. You can think of it as an expiration date for the transaction.
             raise_error: Raises a relevant exception rather than returning `False` if unsuccessful.
-            wait_for_inclusion: Waits for the transaction to be included in a block.
-            wait_for_finalization: Waits for the transaction to be finalized on the blockchain.
+            wait_for_inclusion (bool): Waits for the transaction to be included in a block.
+            wait_for_finalization (bool): Waits for the transaction to be finalized on the blockchain.
             wait_for_revealed_execution: Whether to wait for the revealed execution of transaction if mev_protection used.
 
         Returns:
@@ -7341,9 +7451,9 @@ class Subtensor(SubtensorMixin):
 
 
         Parameters:
-            wallet: The wallet associated with the neuron committing the data.
-            netuid: The unique identifier of the subnetwork.
-            data: The data to be committed to the network.
+            wallet (bittensor_wallet.Wallet): The wallet associated with the neuron committing the data.
+            netuid (int): The unique identifier of the subnetwork.
+            data (str): The data to be committed to the network.
             mev_protection: If `True`, encrypts and submits the transaction through the MEV Shield pallet to protect
                 against front-running and MEV attacks. The transaction remains encrypted in the mempool until validators
                 decrypt and execute it. If `False`, submits the transaction directly without encryption.
@@ -7359,10 +7469,13 @@ class Subtensor(SubtensorMixin):
             ExtrinsicResponse: The result object of the extrinsic execution.
 
         Example:
+
             # Commit some data to subnet 1
+
             response = await subtensor.commit(wallet=my_wallet, netuid=1, data="Hello Bittensor!")
 
             # Commit with custom period
+
             response = await subtensor.commit(wallet=my_wallet, netuid=1, data="Model update v2.0", period=100)
 
         Note: See <https://docs.learnbittensor.org/glossary#commit-reveal>
@@ -7842,35 +7955,63 @@ class Subtensor(SubtensorMixin):
             ExtrinsicResponse: The result object of the extrinsic execution.
 
         Example:
+
             # If you would like to unstake all stakes in all subnets safely:
+
             import bittensor as bt
+
             subtensor = bt.Subtensor()
+
             wallet = bt.Wallet("my_wallet")
+
             netuid = 14
+
             hotkey = "5%SOME_HOTKEY%"
+
             wallet_stakes = subtensor.get_stake_info_for_coldkey(coldkey_ss58=wallet.coldkey.ss58_address)
+
             for stake in wallet_stakes:
+
                 result = subtensor.unstake_all(
+
                     wallet=wallet,
+
                     hotkey_ss58=stake.hotkey_ss58,
+
                     netuid=stake.netuid,
+
                 )
+
                 print(result)
 
             # If you would like to unstake all stakes in all subnets unsafely, use rate_tolerance=None:
+
             import bittensor as bt
+
             subtensor = bt.Subtensor()
+
             wallet = bt.Wallet("my_wallet")
+
             netuid = 14
+
             hotkey = "5%SOME_HOTKEY_WHERE_IS_YOUR_STAKE_NOW%"
+
             wallet_stakes = subtensor.get_stake_info_for_coldkey(coldkey_ss58=wallet.coldkey.ss58_address)
+
             for stake in wallet_stakes:
+
                 result = subtensor.unstake_all(
+
                     wallet=wallet,
+
                     hotkey_ss58=stake.hotkey_ss58,
+
                     netuid=stake.netuid,
+
                     rate_tolerance=None,
+
                 )
+
                 print(result)
 
         Notes:

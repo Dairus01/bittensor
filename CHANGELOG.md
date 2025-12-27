@@ -1,18 +1,5 @@
 # Changelog
 
-## 10.0.1 /2025-12-22
-
-## What's Changed
-* Improve GH workflows by @basfroman in https://github.com/opentensor/bittensor/pull/3207
-* Small but still important changes by @basfroman in https://github.com/opentensor/bittensor/pull/3210
-* Refactor neuron and metagraph by @basfroman in https://github.com/opentensor/bittensor/pull/3214
-* Fix docstrings by @basfroman in https://github.com/opentensor/bittensor/pull/3217
-* Fix nightly workflow by @basfroman in https://github.com/opentensor/bittensor/pull/3225
-* update contrib by @thewhaleking in https://github.com/opentensor/bittensor/pull/3209
-* MeV: fix for weird edge case by @basfroman in https://github.com/opentensor/bittensor/pull/3228
-
-**Full Changelog**: https://github.com/opentensor/bittensor/compare/v10.0.0...v10.0.1
-
 ## 10.0.0 /2025-12-09
 
 ## What's Changed

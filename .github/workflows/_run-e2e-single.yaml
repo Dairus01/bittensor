@@ -1,6 +1,3 @@
-# WARNING: This file is used by multiple workflows. Please modify with caution. Any changes here may affect multiple
-# CI/CD pipelines.
-
 name: Run Single E2E Test with multiple Python versions
 
 on:
@@ -16,16 +13,6 @@ on:
         required: true
         type: string
         description: JSON array of Python versions
-      ref:
-        required: false
-        type: string
-        description: Git ref to checkout
-        default: ""
-      artifact-name:
-        required: false
-        type: string
-        description: Docker image artifact name
-        default: "subtensor-localnet"
 
 jobs:
   run-e2e:
@@ -41,8 +28,6 @@ jobs:
     steps:
       - name: Check-out repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref != '' && inputs.ref || github.ref }}
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -72,10 +57,10 @@ jobs:
       - name: Download Cached Docker Image
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.artifact-name }}
+          name: subtensor-localnet
 
       - name: Load Docker Image
-        run: docker load -i ${{ inputs.artifact-name }}.tar
+        run: docker load -i subtensor-localnet.tar
 
       - name: Run test with retry
         env:

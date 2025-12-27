@@ -534,6 +534,29 @@ class AsyncSubtensor(SubtensorMixin):
         Raises:
             ValueError: If no default value is provided, and none of the methods exist at the given block, a
                 ValueError will be raised.
+
+        Example:
+
+            value = await self._query_with_fallback(
+
+                # the first attempt will be made to SubtensorModule.MechanismEmissionSplit with params [1]
+
+                ("SubtensorModule", "MechanismEmissionSplit", [1]),
+
+                # if it does not exist at the given block, the next attempt will be made to
+
+                # SubtensorModule.MechanismEmission with params None
+
+                ("SubtensorModule", "MechanismEmission", None),
+
+                block_hash="0x1234",
+
+                # if none of the methods exist at the given block, the default value of None will be returned
+
+                default_value=None,
+
+            )
+
         """
         if block_hash is None:
             block_hash = await self.substrate.get_chain_head()
@@ -572,6 +595,37 @@ class AsyncSubtensor(SubtensorMixin):
         Raises:
             ValueError: If no default value is provided, and none of the methods exist at the given block, a
                 ValueError will be raised.
+
+        Example:
+
+            query = await self._runtime_call_with_fallback(
+
+                # the first attempt will be made to SubnetInfoRuntimeApi.get_selective_mechagraph with the
+
+                # given params
+
+                (
+
+                    "SubnetInfoRuntimeApi",
+
+                    "get_selective_mechagraph",
+
+                    [netuid, mechid, [f for f in range(len(SelectiveMetagraphIndex))]],
+
+                ),
+
+                # if it does not exist at the given block, the next attempt will be made as such:
+
+                ("SubnetInfoRuntimeApi", "get_metagraph", [[netuid]]),
+
+                block_hash=block_hash,
+
+                # if none of the methods exist at the given block, the default value will be returned
+
+                default_value=None,
+
+            )
+
         """
         if block_hash is None:
             block_hash = await self.substrate.get_chain_head()
@@ -666,11 +720,17 @@ class AsyncSubtensor(SubtensorMixin):
         Example:
 
             # Simulate staking 100 TAO stake to subnet 1
+
             result = await subtensor.sim_swap(
+
                 origin_netuid=0,
+
                 destination_netuid=1,
+
                 amount=Balance.from_tao(100)
+
             )
+
             print(f"Fee: {result.tao_fee.tao} TAO, Output: {result.alpha_amount} Alpha")
 
         Notes:
@@ -1152,9 +1212,13 @@ class AsyncSubtensor(SubtensorMixin):
         Example:
 
             # Get bonds for subnet 1
+
             bonds = await subtensor.bonds(netuid=1)
+
             print(bonds[0])
+
             # example output: (5, [(0, 32767), (1, 16383), (3, 8191)])
+
             # This means validator UID 5 has bonds: 50% to miner 0, 25% to miner 1, 12.5% to miner 3
 
         Notes:
@@ -1847,9 +1911,13 @@ class AsyncSubtensor(SubtensorMixin):
         Example:
 
             # Get children for a hotkey in subnet 1
+
             success, children, error = await subtensor.get_children(hotkey="5F...", netuid=1)
+
             if success:
+
                 for proportion, child_hotkey in children:
+
                     print(f"Child {child_hotkey}: {proportion}")
 
         Notes:
@@ -1902,6 +1970,7 @@ class AsyncSubtensor(SubtensorMixin):
 
         Returns:
             tuple: A tuple containing:
+
                 - list[tuple[float, str]]: A list of children with their proportions.
                 - int: The cool-down block number.
 
@@ -2032,14 +2101,13 @@ class AsyncSubtensor(SubtensorMixin):
         Otherwise, all known constants defined in `CrowdloanConstants.field_names()` are fetched.
 
         These constants define requirements and operational limits for crowdloan campaigns:
-            AbsoluteMinimumContribution: Minimum amount per contribution (TAO).
-            MaxContributors: Maximum number of unique contributors per crowdloan.
-            MaximumBlockDuration: Maximum duration (in blocks) for a crowdloan campaign (60 days = 432,000 blocks on
-                production).
-            MinimumDeposit: Minimum deposit required from the creator (TAO).
-            MinimumBlockDuration: Minimum duration (in blocks) for a crowdloan campaign (7 days = 50,400 blocks on
-                production).
-            RefundContributorsLimit: Maximum number of contributors refunded per `refund_crowdloan` call (typically 50).
+
+        - `AbsoluteMinimumContribution`: Minimum amount per contribution (TAO).
+        - `MaxContributors`: Maximum number of unique contributors per crowdloan.
+        - `MaximumBlockDuration`: Maximum duration (in blocks) for a crowdloan campaign (60 days = 432,000 blocks on production).
+        - `MinimumDeposit`: Minimum deposit required from the creator (TAO).
+        - `MinimumBlockDuration`: Minimum duration (in blocks) for a crowdloan campaign (7 days = 50,400 blocks on production).
+        - `RefundContributorsLimit`: Maximum number of contributors refunded per `refund_crowdloan` call (typically 50).
 
         Parameters:
             constants: Specific constant names to query. If `None`, retrieves all constants from `CrowdloanConstants`.
@@ -2908,18 +2976,24 @@ class AsyncSubtensor(SubtensorMixin):
         Example:
 
             # Retrieve all fields from the metagraph from subnet 2 mechanism 0
+
             meta_info = subtensor.get_metagraph_info(netuid=2)
 
             # Retrieve all fields from the metagraph from subnet 2 mechanism 1
+
             meta_info = subtensor.get_metagraph_info(netuid=2, mechid=1)
 
             # Retrieve selective data from the metagraph from subnet 2 mechanism 0
+
             partial_meta_info = subtensor.get_metagraph_info(
+
                 netuid=2,
+
                 selected_indices=[SelectiveMetagraphIndex.Name, SelectiveMetagraphIndex.OwnerHotkeys]
             )
 
             # Retrieve selective data from the metagraph from subnet 2 mechanism 1
+
             partial_meta_info = subtensor.get_metagraph_info(
                 netuid=2,
                 mechid=1,
@@ -4861,13 +4935,13 @@ class AsyncSubtensor(SubtensorMixin):
         as long as they match filter_for_netuids.
 
         Parameters:
-            all_netuids: A list of netuids to consider for filtering.
-            filter_for_netuids: A subset of netuids to restrict the result to. If None/empty, returns
+            all_netuids (Iterable[int]): A list of netuids to consider for filtering.
+            filter_for_netuids (Iterable[int]): A subset of netuids to restrict the result to. If None/empty, returns
                 all netuids with registered hotkeys.
-            all_hotkeys: Hotkeys to check for registration.
-            block: The blockchain block number for the query.
-            block_hash: hash of the blockchain block number at which to perform the query.
-            reuse_block: whether to reuse the last-used blockchain hash when retrieving info.
+            all_hotkeys (Iterable[Wallet]): Hotkeys to check for registration.
+            block (Optional[int]): The blockchain block number for the query.
+            block_hash (Optional[str]): hash of the blockchain block number at which to perform the query.
+            reuse_block (bool): whether to reuse the last-used blockchain hash when retrieving info.
 
         Returns:
             The filtered list of netuids (union of filtered all_netuids and registered hotkeys).
@@ -4953,8 +5027,8 @@ class AsyncSubtensor(SubtensorMixin):
         with validator weight submissions.
 
         Parameters:
-            netuid: The unique identifier of the subnet.
-            block: The blockchain block number for the query.
+            netuid (int): The unique identifier of the subnet.
+            block (Optional[int]): The blockchain block number for the query.
             block_hash: The blockchain block_hash representation of the block id.
             reuse_block: Whether to reuse the last-used blockchain block hash.
 
@@ -5198,8 +5272,8 @@ class AsyncSubtensor(SubtensorMixin):
 
         Returns:
             The stored maximum weight limit as a normalized float in [0, 1], or `None` if the subnetwork
-                does not exist. Note: this value is not enforced - the weight validation code uses a hardcoded u16::MAX
-                    instead.
+                does not exist. Note: this value is not actually enforced - the weight validation code uses
+                a hardcoded u16::MAX instead.
 
         Notes:
             - This hyperparameter is now a constant rather than a settable variable.
@@ -5669,6 +5743,7 @@ class AsyncSubtensor(SubtensorMixin):
         Example:
 
             # Waits for a specific block
+
             await subtensor.wait_for_block(block=1234)
         """
 
@@ -6023,12 +6098,19 @@ class AsyncSubtensor(SubtensorMixin):
         Example:
 
             # Estimate fee before sending a transfer
+
             call = await subtensor.compose_call(
+
                 call_module="Balances",
+
                 call_function="transfer",
+
                 call_params={"dest": destination_ss58, "value": amount.rao}
+
             )
+
             fee = await subtensor.get_extrinsic_fee(call=call, keypair=wallet.coldkey)
+
             print(f"Estimated fee: {fee.tao} TAO")
 
         Notes:
@@ -6140,7 +6222,7 @@ class AsyncSubtensor(SubtensorMixin):
             price_low: The lower bound of the price tick range. In TAO.
             price_high: The upper bound of the price tick range. In TAO.
             hotkey_ss58: The hotkey with staked TAO in Alpha. If not passed then the wallet hotkey is used.
-            mev_protection: If `True`, encrypts and submits the transaction through the MEV Shield pallet to protect
+            mev_protection:` If` True, encrypts and submits the transaction through the MEV Shield pallet to protect
                 against front-running and MEV attacks. The transaction remains encrypted in the mempool until validators
                 decrypt and execute it. If `False`, submits the transaction directly without encryption.
             period: The number of blocks during which the transaction will remain valid after it's submitted. If
@@ -6498,7 +6580,7 @@ class AsyncSubtensor(SubtensorMixin):
             mechid: The subnet mechanism unique identifier.
             version_key: Version key for compatibility with the network.
             max_attempts: The number of maximum attempts to commit weights.
-            mev_protection: If `True`, encrypts and submits the transaction through the MEV Shield pallet to protect
+            mev_protection: `If` True, encrypts and submits the transaction through the MEV Shield pallet to protect
                 against front-running and MEV attacks. The transaction remains encrypted in the mempool until validators
                 decrypt and execute it. If `False`, submits the transaction directly without encryption.
             period: The number of blocks during which the transaction will remain valid after it's submitted. If
@@ -7002,7 +7084,7 @@ class AsyncSubtensor(SubtensorMixin):
                 have successfully decrypted and executed the inner call. If True, the function will poll subsequent
                 blocks for the event matching this submission's commitment.
             blocks_for_revealed_execution: Maximum number of blocks to poll for the executed event after
-                inclusion. The function checks blocks from start_block to start_block + blocks_for_revealed_execution.
+                inclusion. The function checks blocks from start_block+1 to start_block + blocks_for_revealed_execution.
                 Returns immediately if the event is found before the block limit is reached.
 
         Returns:
@@ -7061,7 +7143,7 @@ class AsyncSubtensor(SubtensorMixin):
             position_id: The id of the position record in the pool.
             liquidity_delta: The amount of liquidity to be added or removed (add if positive or remove if negative).
             hotkey_ss58: The hotkey with staked TAO in Alpha. If not passed then the wallet hotkey is used.
-            mev_protection: If `True`, encrypts and submits the transaction through the MEV Shield pallet to protect
+            mev_protection:` If` True, encrypts and submits the transaction through the MEV Shield pallet to protect
                 against front-running and MEV attacks. The transaction remains encrypted in the mempool until validators
                 decrypt and execute it. If `False`, submits the transaction directly without encryption.
             period: The number of blocks during which the transaction will remain valid after it's submitted. If
@@ -7076,27 +7158,45 @@ class AsyncSubtensor(SubtensorMixin):
             ExtrinsicResponse: The result object of the extrinsic execution.
 
         Example:
+
             import bittensor as bt
+
             subtensor = bt.AsyncSubtensor(network="local")
+
             await subtensor.initialize()
+
             my_wallet = bt.Wallet()
 
             # if liquidity_delta is negative
+
             my_liquidity_delta = Balance.from_tao(100) * -1
+
             await subtensor.modify_liquidity(
+
                 wallet=my_wallet,
+
                 netuid=123,
+
                 position_id=2,
+
                 liquidity_delta=my_liquidity_delta
+
             )
 
             # if liquidity_delta is positive
+
             my_liquidity_delta = Balance.from_tao(120)
+
             await subtensor.modify_liquidity(
+
                 wallet=my_wallet,
+
                 netuid=123,
+
                 position_id=2,
+
                 liquidity_delta=my_liquidity_delta
+
             )
 
         Note:
@@ -7202,7 +7302,7 @@ class AsyncSubtensor(SubtensorMixin):
 
         Parameters:
             wallet: Bittensor wallet object (the account whose deposits will be adjusted).
-            mev_protection: If `True`, encrypts and submits the transaction through the MEV Shield pallet to protect
+            mev_protection: `If` True, encrypts and submits the transaction through the MEV Shield pallet to protect
                 against front-running and MEV attacks. The transaction remains encrypted in the mempool until validators
                 decrypt and execute it. If `False`, submits the transaction directly without encryption.
             period: The number of blocks during which the transaction will remain valid after it's submitted.
@@ -7659,7 +7759,7 @@ class AsyncSubtensor(SubtensorMixin):
             netuid: The UID of the target subnet for which the call is being initiated.
             position_id: The id of the position record in the pool.
             hotkey_ss58: The hotkey with staked TAO in Alpha. If not passed then the wallet hotkey is used.
-            mev_protection: If `True`, encrypts and submits the transaction through the MEV Shield pallet to protect
+            mev_protection:` If` True, encrypts and submits the transaction through the MEV Shield pallet to protect
                 against front-running and MEV attacks. The transaction remains encrypted in the mempool until validators
                 decrypt and execute it. If `False`, submits the transaction directly without encryption.
             period: The number of blocks during which the transaction will remain valid after it's submitted. If
@@ -8118,7 +8218,7 @@ class AsyncSubtensor(SubtensorMixin):
             wallet: bittensor wallet instance.
             hotkey_ss58: The `SS58` address of the neuron's hotkey.
             take: Percentage reward for the delegate.
-            mev_protection: If `True`, encrypts and submits the transaction through the MEV Shield pallet to protect
+            mev_protection:` If` True, encrypts and submits the transaction through the MEV Shield pallet to protect
                 against front-running and MEV attacks. The transaction remains encrypted in the mempool until validators
                 decrypt and execute it. If `False`, submits the transaction directly without encryption.
             period: The number of blocks during which the transaction will remain valid after it's
@@ -8264,7 +8364,7 @@ class AsyncSubtensor(SubtensorMixin):
             netuid: The unique ID of the network on which the operation takes place.
             subnet_identity: The identity data of the subnet including attributes like name, GitHub repository, contact,
                 URL, discord, description, and any additional metadata.
-            mev_protection: If `True`, encrypts and submits the transaction through the MEV Shield pallet to protect
+            mev_protection:` If` True, encrypts and submits the transaction through the MEV Shield pallet to protect
                 against front-running and MEV attacks. The transaction remains encrypted in the mempool until validators
                 decrypt and execute it. If `False`, submits the transaction directly without encryption.
             period: The number of blocks during which the transaction will remain valid after it's
@@ -8356,11 +8456,17 @@ class AsyncSubtensor(SubtensorMixin):
         Example:
 
             # Set weights directly (for non-commit-reveal subnets)
+
             response = await subtensor.set_weights(
+
                 wallet=wallet,
+
                 netuid=1,
+
                 uids=[0, 1, 2],
+
                 weights=[0.5, 0.3, 0.2]
+
             )
 
             # For commit-reveal subnets, the method automatically handles commit and reveal phases
@@ -8764,6 +8870,7 @@ class AsyncSubtensor(SubtensorMixin):
             rate_tolerance: The maximum allowed increase in the price ratio between subnets
                 (origin_price/destination_price). For example, 0.005 = 0.5% maximum increase. Only used when
                 `safe_swapping` is `True`.
+                safe_staking is True.
             mev_protection: If `True`, encrypts and submits the transaction through the MEV Shield pallet to protect
                 against front-running and MEV attacks. The transaction remains encrypted in the mempool until validators
                 decrypt and execute it. If `False`, submits the transaction directly without encryption.
@@ -8896,7 +9003,7 @@ class AsyncSubtensor(SubtensorMixin):
             keep_alive: If `True`, ensures the source account maintains at least the existential deposit amount. If
                 `False`, the transfer may reduce the balance below the existential deposit, potentially causing the
                 account to be reaped.
-            mev_protection: If `True`, encrypts and submits the transaction through the MEV Shield pallet to protect
+            mev_protection:` If` True, encrypts and submits the transaction through the MEV Shield pallet to protect
                 against front-running and MEV attacks. The transaction remains encrypted in the mempool until validators
                 decrypt and execute it. If `False`, submits the transaction directly without encryption.
             period: The number of blocks during which the transaction will remain valid after it's submitted. If the
@@ -9112,34 +9219,59 @@ class AsyncSubtensor(SubtensorMixin):
             # value:
 
             import bittensor as bt
+
             subtensor = bt.AsyncSubtensor()
+
             wallet = bt.Wallet("my_wallet")
+
             netuid = 14
+
             hotkey = "5%SOME_HOTKEY_WHERE_IS_YOUR_STAKE_NOW%"
+
             wallet_stakes = await subtensor.get_stake_info_for_coldkey(coldkey_ss58=wallet.coldkey.ss58_address)
+
             for stake in wallet_stakes:
+
                 result = await subtensor.unstake_all(
+
                     wallet=wallet,
+
                     hotkey_ss58=stake.hotkey_ss58,
+
                     netuid=stake.netuid,
+
                 )
+
                 print(result)
 
             # If you would like to unstake all stakes in all subnets unsafely, use rate_tolerance=None:
 
             import bittensor as bt
+
             subtensor = bt.AsyncSubtensor()
+
             wallet = bt.Wallet("my_wallet")
+
             netuid = 14
+
             hotkey = "5%SOME_HOTKEY_WHERE_IS_YOUR_STAKE_NOW%"
+
             wallet_stakes = await subtensor.get_stake_info_for_coldkey(coldkey_ss58=wallet.coldkey.ss58_address)
+
             for stake in wallet_stakes:
+
                 result = await subtensor.unstake_all(
+
                     wallet=wallet,
+
                     hotkey_ss58=stake.hotkey_ss58,
+
                     netuid=stake.netuid,
+
                     rate_tolerance=None,
+
                 )
+
                 print(result)
 
         Notes:
@@ -9472,9 +9604,11 @@ async def get_async_subtensor(
     Example:
 
         # Create and initialize in one step
+
         subtensor = await get_async_subtensor(network="finney")
 
         # Ready to use immediately
+
         block = await subtensor.get_current_block()
 
     """
