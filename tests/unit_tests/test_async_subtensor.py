@@ -2187,9 +2187,10 @@ async def test_get_vote_data_success(subtensor, mocker):
     )
 
     # Call
-    result = await subtensor.get_vote_data(
-        proposal_hash=fake_proposal_hash, block_hash=fake_block_hash
-    )
+    with pytest.warns(DeprecationWarning, match="Senate functionality has been removed"):
+        result = await subtensor.get_vote_data(
+            proposal_hash=fake_proposal_hash, block_hash=fake_block_hash
+        )
 
     # Asserts
     mocked_query.assert_called_once_with(
@@ -2213,9 +2214,10 @@ async def test_get_vote_data_no_data(subtensor, mocker):
     subtensor.substrate.query = mocked_query
 
     # Call
-    result = await subtensor.get_vote_data(
-        proposal_hash=fake_proposal_hash, block_hash=fake_block_hash
-    )
+    with pytest.warns(DeprecationWarning, match="Senate functionality has been removed"):
+        result = await subtensor.get_vote_data(
+            proposal_hash=fake_proposal_hash, block_hash=fake_block_hash
+        )
 
     # Asserts
     mocked_query.assert_called_once_with(
