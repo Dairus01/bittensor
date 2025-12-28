@@ -1193,6 +1193,22 @@ def test_serve_axon(subtensor, mocker):
     assert result == mocked_serve_axon_extrinsic.return_value
 
 
+def test_get_vote_data_not_implemented(subtensor):
+    """Tests get_vote_data raises NotImplementedError."""
+    # Preps
+    fake_proposal_hash = "valid_proposal_hash"
+    fake_block = 123
+
+    # Call & Assert
+    with pytest.raises(
+        NotImplementedError,
+        match="The Senate \(Triumvirate\) functionality has been removed from the Bittensor chain.",
+    ):
+        subtensor.get_vote_data(
+            proposal_hash=fake_proposal_hash, block=fake_block
+        )
+
+
 def test_get_block_hash(subtensor, mocker):
     """Tests successful get_block_hash call."""
     # Prep

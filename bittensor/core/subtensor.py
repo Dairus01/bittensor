@@ -3903,8 +3903,10 @@ class Subtensor(SubtensorMixin):
     def get_vote_data(
         self, proposal_hash: str, block: Optional[int] = None
     ) -> Optional["ProposalVoteData"]:
-        # TODO: is this all deprecated? Didn't subtensor senate stuff get removed?
         """
+        Deprecated: The Senate (Triumvirate) functionality has been removed from the Bittensor chain.
+        This method is deprecated and will raise a NotImplementedError if called.
+
         Retrieves the voting data for a specific proposal on the Bittensor blockchain. This data includes information
         about how senate members have voted on the proposal.
 
@@ -3914,21 +3916,10 @@ class Subtensor(SubtensorMixin):
 
         Returns:
             An object containing the proposal's voting data, or `None` if not found.
-
-        This function is important for tracking and understanding the decision-making processes within the Bittensor
-        network, particularly how proposals are received and acted upon by the governing body.
         """
-        vote_data: dict[str, Any] = self.substrate.query(
-            module="Triumvirate",
-            storage_function="Voting",
-            params=[proposal_hash],
-            block_hash=self.determine_block_hash(block),
+        raise NotImplementedError(
+            "The Senate (Triumvirate) functionality has been removed from the Bittensor chain."
         )
-
-        if vote_data is None:
-            return None
-
-        return ProposalVoteData.from_dict(vote_data)
 
     def get_uid_for_hotkey_on_subnet(
         self, hotkey_ss58: str, netuid: int, block: Optional[int] = None
