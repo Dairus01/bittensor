@@ -1,6 +1,7 @@
 import asyncio
 import copy
 import ssl
+import warnings
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Iterable, Literal, Optional, Union, cast
 
@@ -4772,10 +4773,13 @@ class AsyncSubtensor(SubtensorMixin):
         block_hash: Optional[str] = None,
         reuse_block: bool = False,
     ) -> Optional["ProposalVoteData"]:
-        # TODO: is this all deprecated? Didn't subtensor senate stuff get removed?
         """
         Retrieves the voting data for a specific proposal on the Bittensor blockchain. This data includes information
         about how senate members have voted on the proposal.
+
+        .. warning::
+            This method is deprecated and will be removed in a future version.
+            The Senate functionality has been removed from the Bittensor network.
 
         Parameters:
             proposal_hash: The hash of the proposal for which voting data is requested.
@@ -4789,6 +4793,12 @@ class AsyncSubtensor(SubtensorMixin):
         This function is important for tracking and understanding the decision-making processes within the Bittensor
         network, particularly how proposals are received and acted upon by the governing body.
         """
+        warnings.warn(
+            "get_vote_data is deprecated and will be removed in a future version. "
+            "The Senate functionality has been removed from the Bittensor network.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         block_hash = await self.determine_block_hash(block, block_hash, reuse_block)
         vote_data: dict[str, Any] = await self.substrate.query(
             module="Triumvirate",
