@@ -1569,8 +1569,12 @@ class Subtensor(SubtensorMixin):
         Returns:
             The commitment data as a string.
 
-
-            # TODO: add a real example of how to handle realistic commitment data, or chop example
+        Example:
+            >>> import bittensor as bt
+            >>> subtensor = bt.Subtensor()
+            >>> commitment = subtensor.get_commitment(netuid=1, uid=2)
+            >>> print(commitment)
+            '{"peer_id": "12D3...", "model_huggingface_id": "org/model"}'
 
         Notes:
             - <https://docs.learnbittensor.org/glossary#commit-reveal>
@@ -1594,7 +1598,6 @@ class Subtensor(SubtensorMixin):
     def get_commitment_metadata(
         self, netuid: int, hotkey_ss58: str, block: Optional[int] = None
     ) -> Union[str, dict]:
-        # TODO: how to handle return data? need good example @roman
         """Fetches raw commitment metadata from specific subnet for given hotkey.
 
         Parameters:
@@ -1605,6 +1608,30 @@ class Subtensor(SubtensorMixin):
         Returns:
             The raw commitment metadata. Returns a dict when commitment data exists,
             or an empty string when no commitment is found for the given hotkey on the subnet.
+
+            The dictionary returned has the following structure:
+            {
+                "deposit": int,
+                "block": int,
+                "info": {
+                    "fields": (
+                        (
+                            {
+                                "Raw<length>": (tuple of ints representing bytes)
+                            },
+                        ),
+                    )
+                }
+            }
+
+        Example:
+            >>> import bittensor as bt
+            >>> from bittensor.core.chain_data.utils import decode_metadata
+            >>> subtensor = bt.Subtensor()
+            >>> metadata = subtensor.get_commitment_metadata(netuid=1, hotkey_ss58="5D...")
+            >>> if isinstance(metadata, dict):
+            ...     commitment = decode_metadata(metadata)
+            ...     print(commitment)
 
         Notes:
             - <https://docs.learnbittensor.org/glossary#commit-reveal>
