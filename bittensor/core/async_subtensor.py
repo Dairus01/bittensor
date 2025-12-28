@@ -8544,11 +8544,12 @@ class AsyncSubtensor(SubtensorMixin):
         wait_for_finalization: bool = True,
         wait_for_revealed_execution: bool = True,
     ) -> ExtrinsicResponse:
-        """Commits arbitrary data to the Bittensor network by publishing metadata.
-        # TODO: check with @roman, is this about 'arbitrary data' or 'commit-reveal'? we need a real example here if this is important.
-                This method allows neurons to publish arbitrary data to the blockchain, which can be used for various purposes
-                such as sharing model updates, configuration data, or other network-relevant information. The data is encoded
-                and stored on-chain as metadata.
+        """
+        Commits arbitrary data to the Bittensor network by publishing metadata.
+
+        This method allows neurons to publish arbitrary data to the blockchain, which can be used for various purposes
+        such as sharing model updates, configuration data, or other network-relevant information. The data is encoded
+        and stored on-chain as metadata.
 
         Parameters:
             wallet: The wallet associated with the neuron committing the data.
@@ -8566,6 +8567,11 @@ class AsyncSubtensor(SubtensorMixin):
 
         Returns:
             ExtrinsicResponse: The result object of the extrinsic execution.
+
+        Example:
+            # Commit some data to subnet 1
+            data = "my-unique-data-string"
+            await subtensor.set_commitment(wallet=wallet, netuid=1, data=data)
 
         Notes:
             The data is automatically encoded as bytes before submission. There may be size limits on metadata
