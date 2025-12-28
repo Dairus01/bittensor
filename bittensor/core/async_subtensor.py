@@ -5776,7 +5776,6 @@ class AsyncSubtensor(SubtensorMixin):
         block_hash: Optional[str] = None,
         reuse_block: bool = False,
     ):
-        # TODO: Examples: validate against metadata;
         """
         Validate and filter extrinsic parameters against on-chain metadata.
 
@@ -5798,6 +5797,22 @@ class AsyncSubtensor(SubtensorMixin):
         Raises:
             ValueError: If the given module or function is not found in the chain metadata.
             KeyError: If one or more required parameters are missing.
+
+        Example:
+            # Validate parameters for the 'set_mechanism_weights' extrinsic in 'SubtensorModule'
+            valid_params = await subtensor.validate_extrinsic_params(
+                call_module="SubtensorModule",
+                call_function="set_mechanism_weights",
+                call_params={
+                    "netuid": 1,
+                    "mecid": 0,
+                    "dests": [1, 2, 3],
+                    "weights": [10, 20, 30],
+                    "version_key": 0,
+                    "extra_param": "ignored"
+                }
+            )
+            # valid_params will contain "netuid", "mecid", "dests", "weights", "version_key", but not "extra_param"
 
         Notes:
             This method does not compose or submit the extrinsic. It only ensures that `call_params` conforms to the
