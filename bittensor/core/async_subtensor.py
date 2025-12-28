@@ -3717,9 +3717,17 @@ class AsyncSubtensor(SubtensorMixin):
             reuse_block: Whether to reuse the last-used block hash. Do not set if using `block_hash` or `block`.
 
         Returns:
-            A tuple of reveal block and commitment message.
+            Optional[tuple[tuple[int, str], ...]]: A tuple of tuples, where each inner tuple contains:
+                - int: The block number when the commitment was revealed.
+                - str: The revealed commitment message.
+            Returns `None` if no commitments are found.
 
-        # TODO: add example to clarify return ordering and units; @roman can you help w this?
+        Example:
+
+            # sample return value
+
+            ( (12, "Alice message 1"), (152, "Alice message 2") )
+
         Notes:
             - <https://docs.learnbittensor.org/glossary#commit-reveal>
         """
