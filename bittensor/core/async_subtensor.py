@@ -1992,7 +1992,6 @@ class AsyncSubtensor(SubtensorMixin):
         block_hash: Optional[str] = None,
         reuse_block: bool = False,
     ) -> Union[str, dict]:
-        # TODO: how to handle return data? need good example @roman
         """Fetches raw commitment metadata from specific subnet for given hotkey.
 
         Parameters:
@@ -2005,6 +2004,17 @@ class AsyncSubtensor(SubtensorMixin):
         Returns:
             The raw commitment metadata. Returns a dict when commitment data exists,
             or an empty string when no commitment is found for the given hotkey on the subnet.
+
+        Example:
+            >>> import bittensor as bt
+            >>> from bittensor.core.chain_data.utils import decode_metadata
+            >>> subtensor = bt.AsyncSubtensor()
+            >>> # Get the raw metadata
+            >>> metadata = await subtensor.get_commitment_metadata(netuid=1, hotkey_ss58="5...")
+            >>> if metadata:
+            ...     # Decode the metadata to get the commitment string
+            ...     commitment = decode_metadata(metadata)
+            ...     print(f"Commitment: {commitment}")
 
         Notes:
             - <https://docs.learnbittensor.org/glossary#commit-reveal>
