@@ -6430,3 +6430,69 @@ def test_mev_submit_encrypted_default_params(subtensor, fake_wallet, mocker):
         blocks_for_revealed_execution=3,
     )
     assert result == mocked_submit_encrypted_extrinsic.return_value
+
+
+def test_get_revealed_commitment_by_hotkey_success(subtensor, mocker):
+    """Test get_revealed_commitment_by_hotkey returns correct structure."""
+
+    # Mock data
+    netuid = 1
+    hotkey_ss58 = "5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM"
+    block = 123
+
+    # Mock the query response
+    # The query returns a list of tuples. Each tuple is (commitment_bytes, block_number)
+    # commitment_bytes structure: first byte is mode (offset), then commitment bytes.
+    # If mode is 0, offset is 1.
+
+    # Example 1: block 100, message "hello"
+    commitment_1 = b"\x00" + b"hello"
+    block_1 = 100
+
+    # Example 2: block 150, message "world"
+    commitment_2 = b"\x00" + b"world"
+    block_2 = 150
+
+    mock_query_return = [(commitment_1, block_1), (commitment_2, block_2)]
+
+    mock_query_module = mocker.patch.object(
+        subtensor, "query_module", return_value=mock_query_return
+    )
+
+    result = subtensor.get_revealed_commitment_by_hotkey(
+        netuid=netuid, hotkey_ss58=hotkey_ss58, block=block
+    )
+
+    mock_query_module.assert_called_once_with(
+        module="Commitments",
+        name="RevealedCommitments",
+        params=[netuid, hotkey_ss58],
+        block=block,
+    )
+
+    # Verify result structure
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+
+    # Order is preserved from the query result
+    assert result[0] == (100, "hello")
+    assert result[1] == (150, "world")
+
+
+def test_get_revealed_commitment_by_hotkey_invalid_address(subtensor):
+    """Test get_revealed_commitment_by_hotkey raises error for invalid address."""
+    with pytest.raises(ValueError, match="Invalid ss58 address"):
+        subtensor.get_revealed_commitment_by_hotkey(
+            netuid=1, hotkey_ss58="invalid_address"
+        )
+
+
+def test_get_revealed_commitment_by_hotkey_none(subtensor, mocker):
+    """Test get_revealed_commitment_by_hotkey returns None when query returns None."""
+    mocker.patch.object(subtensor, "query_module", return_value=None)
+
+    result = subtensor.get_revealed_commitment_by_hotkey(
+        netuid=1, hotkey_ss58="5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM"
+    )
+
+    assert result is None

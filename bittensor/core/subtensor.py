@@ -3138,7 +3138,6 @@ class Subtensor(SubtensorMixin):
         hotkey_ss58: str,
         block: Optional[int] = None,
     ) -> Optional[tuple[tuple[int, str], ...]]:
-        # TODO: Clarify return ordering and units; add Examples
         """Retrieves hotkey related revealed commitment for a given subnet.
 
         Parameters:
@@ -3147,7 +3146,12 @@ class Subtensor(SubtensorMixin):
             block: The block number to query. If `None`, queries the current chain head.
 
         Returns:
-            A tuple of reveal block and commitment message.
+            A tuple of tuples, where each inner tuple contains the reveal block number and the commitment message.
+            The return format is `((reveal_block, commitment_message), ...)`.
+
+        Example:
+            >>> subtensor.get_revealed_commitment_by_hotkey(netuid=1, hotkey_ss58="5C4hr...")
+            ((123, "commitment_string_1"), (150, "commitment_string_2"))
 
         Notes:
             - <https://docs.learnbittensor.org/glossary#commit-reveal>
