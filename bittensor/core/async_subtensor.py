@@ -1957,8 +1957,23 @@ class AsyncSubtensor(SubtensorMixin):
         Returns:
             The commitment data as a string.
 
+        Example:
+            To set the commitment:
+                >>> import bittensor as bt
+                >>> wallet = bt.Wallet(name="my_wallet")
+                >>> subtensor = bt.AsyncSubtensor(network="test")
+                >>> netuid = 1
+                >>> # Set a commitment (e.g. a hash of some data)
+                >>> data = "0x1234567890abcdef"
+                >>> await subtensor.set_commitment(wallet=wallet, netuid=netuid, data=data)
 
-            # TODO: add a real example of how to handle realistic commitment data, or chop example
+            To retrieve the commitment:
+                >>> # Get the UID of the neuron
+                >>> uid = await subtensor.get_uid_for_hotkey_on_subnet(wallet.hotkey.ss58_address, netuid)
+                >>> # Retrieve the commitment
+                >>> commitment = await subtensor.get_commitment(netuid=netuid, uid=uid)
+                >>> print(commitment)
+                '0x1234567890abcdef'
 
         Notes:
             - <https://docs.learnbittensor.org/glossary#commit-reveal>
